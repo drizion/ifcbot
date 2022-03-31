@@ -102,3 +102,7 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Private auth and message store
+auth_info_multi.json
+baileys_store_multi.json
