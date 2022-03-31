@@ -46,11 +46,62 @@ const startSock = async() => {
                 switch(command){ // commands
                     case '':
                     break
-                    case 'menu':
-                        await sock.sendMessage(from, { text: 'bem vindo ao menu!\n\nessa é a versão de testes da próxima atualização do wabot.net\n\naté o momento, o único comando funcionando é #fig' })
+                    case 'oi':
+                        var sections = [
+                            {
+                            title: "Sobre o Campus",
+                            rows: [
+                                {title: "Localização", rowId: `${prefix}local`, description: "Como chegar até o campus?"}
+                            ]
+                            },
+                           {
+                            title: "Desenvolvedores",
+                            rows: [
+                                {title: "Criador", rowId: `${prefix}criador`, description: "Conheça o aluno desenvolvedor do assistente."},
+                                {title: "Orientador", rowId: `${prefix}orientador`, description: "Conheça o orientador do projeto."}
+                            ]
+                            },
+                        ]
+                        await sock.sendMessage(from, {
+                            text: "Olá! Sou um assistente virtual, como posso te ajudar?",
+                            footer: "https://sombrio.ifc.edu.br",
+                            title: "[Assistente do IFC-CAS]",
+                            buttonText: "Saiba mais",
+                            sections
+                        })
                     break
-                    case 'add':
-                        console.log("command add")
+                    case 'local':
+                        await sock.sendMessage(
+                            from, {
+                                text: "O Instituto Federal Catarinense - Campus Avançado Sombrio está localizado na Av. Pref. Francisco Lumertz Júnior, 931 - Januária, Sombrio - SC, 88960-000\n\nVocê também pode encontrá-lo clicando na localização abaixo:"
+                            }
+                        )
+                        await sock.sendMessage(
+                            from, 
+                            { location: { degreesLatitude: -29.1018802, degreesLongitude: -49.6385941 } }
+                        )
+                    break
+                    case 'criador':
+                        var templateButtons = [
+                            {index: 1, urlButton: {displayText: '⭐ Siga no Instagram!', url: 'https://instagram.com/gabriel.da.silva_'}},
+                            {index: 2, quickReplyButton: {displayText: 'Voltar ao menu', id: `${prefix}oi`}},
+                        ]
+                        await sock.sendMessage(from, {
+                            text: "Siga o bolsista desenvolvedor do projeto!",
+                            footer: "https://sombrio.ifc.edu.br",
+                            templateButtons: templateButtons
+                        })
+                    break
+                    case 'orientador':
+                        var templateButtons = [
+                            {index: 1, urlButton: {displayText: '⭐ Linkedin', url: 'https://br.linkedin.com/in/matheuslbraga'}},
+                            {index: 2, quickReplyButton: {displayText: 'Voltar ao menu', id: `${prefix}oi`}},
+                        ]
+                        await sock.sendMessage(from, {
+                            text: "Conheça o orientador do projeto!",
+                            footer: "https://sombrio.ifc.edu.br",
+                            templateButtons: templateButtons
+                        })
                     break
                     case 'msg':
                         if(!isOwner) return
