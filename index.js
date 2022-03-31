@@ -1,7 +1,6 @@
 import P from 'pino'
 import makeWASocket, { delay, getContentType, DisconnectReason, fetchLatestBaileysVersion, makeInMemoryStore, useSingleFileAuthState } from '@adiwajshing/baileys'
 import setMediaType from './lib/setMediaType.js'
-
 const prefix = "#"
 
 const store = makeInMemoryStore({ logger: P().child({ level: 'error', stream: 'store' }) })
