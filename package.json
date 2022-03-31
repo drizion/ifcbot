@@ -1,0 +1,20 @@
+{
+  "name": "ifcbot",
+  "version": "1.0.0",
+  "description": "Assistente virtual do Instituto Federal Catarinense Campus Avançado Sombrio via WhatsApp",
+  "main": "index.js",
+  "type": "module",
+  "repository": "https://github.com/drizion/ifcbot.git",
+  "author": "drizion <vocalmusicstudio20@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@adiwajshing/baileys": "^4.0.1",
+    "@adiwajshing/keyed-db": "^0.2.4",
+    "child_process": "^1.0.2",
+    "fluent-ffmpeg": "^2.1.2",
+    "fs": "^0.0.1-security",
+    "jimp": "^0.16.1",
+    "qrcode-terminal": "^0.12.0",
+    "sharp": "^0.30.3"
+  }
+}
