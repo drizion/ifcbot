@@ -10,11 +10,13 @@
   "dependencies": {
     "@adiwajshing/baileys": "^4.0.1",
     "@adiwajshing/keyed-db": "^0.2.4",
+    "cheerio": "^1.0.0-rc.10",
     "child_process": "^1.0.2",
     "fluent-ffmpeg": "^2.1.2",
     "fs": "^0.0.1-security",
     "jimp": "^0.16.1",
     "qrcode-terminal": "^0.12.0",
+    "request": "^2.88.2",
     "sharp": "^0.30.3"
   }
 }

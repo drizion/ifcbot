@@ -1,65 +1,90 @@
-import P from 'pino'
 import makeWASocket, { delay, getContentType, DisconnectReason, fetchLatestBaileysVersion, makeInMemoryStore, useSingleFileAuthState } from '@adiwajshing/baileys'
+import P from 'pino'
 import setMediaType from './lib/setMediaType.js'
+import { horarioEM } from './lib/ifc.js'
+
 const prefix = "#"
+const store = makeInMemoryStore({
+    logger: P().child({
+        level: 'error',
+        stream: 'store'
+    })
+})
+store.readFromFile('./session/baileys_store_multi.json')
+setInterval(() => {
+    store.writeToFile('./session/baileys_store_multi.json')
+}, 10_000)
 
-const store = makeInMemoryStore({ logger: P().child({ level: 'error', stream: 'store' }) })
-store.readFromFile('./store/baileys_store_multi.json')
-    setInterval(() => {
-	    store.writeToFile('./store/baileys_store_multi.json')
-    }, 10_000)
+const { state, saveState } = useSingleFileAuthState('./session/auth_info_multi.json')
 
-const { state, saveState } = useSingleFileAuthState('./auth/auth_info_multi.json')
-
-const startSock = async() => {
-	const { version, isLatest } = await fetchLatestBaileysVersion()
-	console.log(`using WA v${version.join('.')}, isLatest: ${isLatest}`)
-	const sock = makeWASocket["default"]({
-		version,
-		logger: P({ level: 'error' }),
-		printQRInTerminal: true,
-		auth: state
-	})
-	store.bind(sock.ev)
-	
-	sock.ev.on('messages.upsert', async m => {	
-		try {
+const startSock = async () => {
+    const { version, isLatest } = await fetchLatestBaileysVersion()
+    console.log(`using WA v${version.join('.')}, isLatest: ${isLatest}`)
+    const sock = makeWASocket["default"]({
+        version,
+        logger: P({
+            level: 'error'
+        }),
+        printQRInTerminal: true,
+        auth: state
+    })
+    store.bind(sock.ev)
+    //
+    const reply = async (message) => {
+        await sock.sendMessage(from, {
+            text: message
+        }, {
+            quoted: msg
+        })
+    }
+    //
+    sock.ev.on('messages.upsert', async m => {
+        try {
             if (m.type !== 'notify') return
-            const msg = m.messages[0] // last message
-            const sMsg = JSON.stringify(msg,null,2) // stringified message
-            const from = msg.key.remoteJid // chat id
-			const isGroup = from.endsWith('@g.us')
-            const ownerNumber = "555190052219@s.whatsapp.net"
-			const sender = msg.key.participant || msg.key.remoteJid
-            const isOwner = sender.includes(ownerNumber) || false
+            const msg = m.messages[0]
+            const sMsg = JSON.stringify(msg, null, 2)
+            const from = msg.key.remoteJid
             const MediaType = setMediaType(msg.message)
-            const body = MediaType.body
-            const isMedia = MediaType.isMedia
-            const isQuotedImage = MediaType.isQuotedImage
-            const isQuotedVideo = MediaType.isQuotedVideo
-            const isQuotedAudio = MediaType.isQuotedAudio
-            const isQuotedSticker = MediaType.isQuotedSticker
-            const isMediaType = MediaType.isMediaType
-            // if is a command
-            if(body.startsWith(prefix)){
-                const command =  body.slice(1).trim().split(' ')[0].toLowerCase()
-                switch(command){ // commands
+            const sender = msg.key.participant?.split(":")[0] || msg.key.remoteJid
+            const ownerNumber = "555190052219@s.whatsapp.net"
+            const isOwner = sender.includes(ownerNumber) || false
+            const isGroup = from.endsWith('@g.us')
+            const { body, isMedia, isQuotedAudio, isQuotedImage, isQuotedSticker, isQuotedVideo, isMediaType } = MediaType
+            if (body.startsWith(prefix)) {
+                const command = body.slice(1).trim().split(' ')[0].toLowerCase()
+                switch (command) { // commands
                     case '':
-                    break
+                        break
                     case 'oi':
-                        var sections = [
-                            {
-                            title: "Sobre o Campus",
-                            rows: [
-                                {title: "Localização", rowId: `${prefix}local`, description: "Como chegar até o campus?"}
-                            ]
+                        var sections = [{
+                                title: "Informações importantes",
+                                rows: [{
+                                    title: "Horário",
+                                    rowId: `${prefix}horario`,
+                                    description: "Horário do Ensino Médio atualizado."
+                                }]
                             },
-                           {
-                            title: "Desenvolvedores",
-                            rows: [
-                                {title: "Criador", rowId: `${prefix}criador`, description: "Conheça o aluno desenvolvedor do assistente."},
-                                {title: "Orientador", rowId: `${prefix}orientador`, description: "Conheça o orientador do projeto."}
-                            ]
+                            {
+                                title: "Sobre o Campus",
+                                rows: [{
+                                    title: "Localização",
+                                    rowId: `${prefix}local`,
+                                    description: "Como chegar até o campus?"
+                                }]
+                            },
+                            {
+                                title: "Desenvolvedores",
+                                rows: [{
+                                        title: "Criador",
+                                        rowId: `${prefix}criador`,
+                                        description: "Conheça o aluno desenvolvedor do assistente."
+                                    },
+                                    {
+                                        title: "Orientador",
+                                        rowId: `${prefix}orientador`,
+                                        description: "Conheça o orientador do projeto."
+                                    }
+                                ]
                             },
                         ]
                         await sock.sendMessage(from, {
@@ -69,7 +94,7 @@ const startSock = async() => {
                             buttonText: "Saiba mais",
                             sections
                         })
-                    break
+                        break
                     case 'local':
                         await sock.sendMessage(
                             from, {
@@ -77,68 +102,126 @@ const startSock = async() => {
                             }
                         )
                         await sock.sendMessage(
-                            from, 
-                            { location: { degreesLatitude: -29.1018802, degreesLongitude: -49.6385941 } }
+                            from, {
+                                location: {
+                                    degreesLatitude: -29.1018802,
+                                    degreesLongitude: -49.6385941
+                                }
+                            }
                         )
-                    break
+                        break
                     case 'criador':
-                        var templateButtons = [
-                            {index: 1, urlButton: {displayText: '⭐ Siga no Instagram!', url: 'https://instagram.com/gabriel.da.silva_'}},
-                            {index: 2, quickReplyButton: {displayText: 'Voltar ao menu', id: `${prefix}oi`}},
+                        var templateButtons = [{
+                                index: 1,
+                                urlButton: {
+                                    displayText: '⭐ Siga no Instagram!',
+                                    url: 'https://instagram.com/gabriel.da.silva_'
+                                }
+                            },
+                            {
+                                index: 2,
+                                quickReplyButton: {
+                                    displayText: 'Voltar ao menu',
+                                    id: `${prefix}oi`
+                                }
+                            },
                         ]
                         await sock.sendMessage(from, {
                             text: "Siga o bolsista desenvolvedor do projeto!",
                             footer: "https://sombrio.ifc.edu.br",
                             templateButtons: templateButtons
                         })
-                    break
+                        break
                     case 'orientador':
-                        var templateButtons = [
-                            {index: 1, urlButton: {displayText: '⭐ Linkedin', url: 'https://br.linkedin.com/in/matheuslbraga'}},
-                            {index: 2, quickReplyButton: {displayText: 'Voltar ao menu', id: `${prefix}oi`}},
+                        var templateButtons = [{
+                                index: 1,
+                                urlButton: {
+                                    displayText: '⭐ Linkedin',
+                                    url: 'https://br.linkedin.com/in/matheuslbraga'
+                                }
+                            },
+                            {
+                                index: 2,
+                                quickReplyButton: {
+                                    displayText: 'Voltar ao menu',
+                                    id: `${prefix}oi`
+                                }
+                            },
                         ]
                         await sock.sendMessage(from, {
                             text: "Conheça o orientador do projeto!",
                             footer: "https://sombrio.ifc.edu.br",
                             templateButtons: templateButtons
                         })
-                    break
+                        break
+                    case 'horario':
+                        horarioEM().then(async (horario) => {
+                            var templateButtons = [{
+                                    index: 1,
+                                    urlButton: {
+                                        displayText: 'Ver horário atualizado ⭐',
+                                        url: horario
+                                    }
+                                },
+                                {
+                                    index: 2,
+                                    quickReplyButton: {
+                                        displayText: 'Voltar ao menu',
+                                        id: `${prefix}oi`
+                                    }
+                                },
+                            ]
+                            await sock.sendMessage(from, {
+                                text: "Olá! O horário mais atualizado para os cursos técnicos integrados se encontra no botão abaixo",
+                                footer: "https://sombrio.ifc.edu.br",
+                                templateButtons: templateButtons
+                            })
+                        })
+                        break
                     case 'msg':
-                        if(!isOwner) return
-                        await sock.sendMessage(from, { text: JSON.stringify(msg,null,2)})                
-                    break
+                        if (!isOwner) return
+                        await sock.sendMessage(from, {
+                            text: JSON.stringify(msg, null, 2)
+                        })
+                        break
                     case 'status':
-                        await sock.sendMessage(from, { text: JSON.stringify(MediaType,null,2)})
-                    break
+                        await sock.sendMessage(from, {
+                            text: JSON.stringify(MediaType, null, 2)
+                        })
+                        break
                     default:
-                        await sock.sendMessage(from, { text: `desculpe, o comando ${prefix}${command} não existe...`})
-                    break
+                        await sock.sendMessage(from, {
+                            text: `desculpe, o comando ${prefix}${command} não existe...`
+                        })
+                        break
                 }
                 console.log(`[cmd]: (${command}) | ${body} | ${sender}`)
             } else {
-                if(body !== '') {
+                if (body !== '') {
                     console.log(`[msg]: ${body} | ${sender.replace('@s.whatsapp.net','')}`)
                 }
             }
         } catch (e) {
             console.log('error: ' + e)
         }
-	})
+    })
 
-	sock.ev.on('connection.update', (update) => {
-		const { connection, lastDisconnect } = update
-		if(connection === 'close') {
-			// reconnect if not logged out
-			if((lastDisconnect?.error)?.output?.statusCode !== DisconnectReason.loggedOut) {
-				startSock()
-			} else {
-				console.log('Connection closed. You are logged out.')
-			}
-		}
-		console.log('connection update', update)
-	})
-		sock.ev.on('creds.update', saveState)
-	return sock
+    sock.ev.on('connection.update', (update) => {
+        const {
+            connection,
+            lastDisconnect
+        } = update
+        if (connection === 'close') {
+            if ((lastDisconnect?.error)?.output?.statusCode !== DisconnectReason.loggedOut) {
+                startSock()
+            } else {
+                console.log('Connection closed. You are logged out.')
+            }
+        }
+        console.log('connection update', update)
+    })
+    sock.ev.on('creds.update', saveState)
+    return sock
 }
 
 startSock()
