@@ -1,0 +1,15 @@
+{
+    "config": {
+        "prefix": "#"
+    },
+    "conhecer": {
+        "geral": "Okay, Vamos conhecer o campus!\nPosso te mostrar informações sobre localização, diretoria, processos seletivos, dentre muitas outras coisas :)",
+        "diretoria": "A diretoria do Campus Avançado Sombrio está representada pelo nosso querido Lucas Spillere Barchinski. Ele também é professor de Matemática e pode ser encontrado através do telefone (48) 3533-4001 ou pelo e-mail lucas.barchinski@ifc.edu.br",
+        "local": "O Instituto Federal Catarinense - Campus Avançado Sombrio está localizado na Av. Pref. Francisco Lumertz Júnior, 931 - Januária, Sombrio - SC, 88960-000\n\nVocê também pode encontrá-lo clicando na localização abaixo:",
+        "processoseletivo": {
+            "geral": "Certo!\nO IFC-CAS possui:\n • Ensino Médio com Curso Técnico Integrado\n • Curso Superior para quem já fez o Ensino Médio\n\nEscolha qual você quer conhecer.",
+            "integrado": "",
+            "superior": ""
+        }
+    }
+}

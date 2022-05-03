@@ -1,9 +1,11 @@
 import makeWASocket, { delay, getContentType, DisconnectReason, fetchLatestBaileysVersion, makeInMemoryStore, useSingleFileAuthState } from '@adiwajshing/baileys'
+import * as fs from 'fs'
 import P from 'pino'
 import setMediaType from './lib/setMediaType.js'
 import { horarioEM } from './lib/ifc.js'
 
-const prefix = "#"
+const dic = JSON.parse(fs.readFileSync('./lib/dictionary.json'))
+const prefix = dic.config.prefix
 const store = makeInMemoryStore({
     logger: P().child({
         level: 'error',
@@ -56,20 +58,21 @@ const startSock = async () => {
                     case '':
                         break
                     case 'oi':
-                        var sections = [{
-                                title: "Informações importantes",
+                        var sections = [
+                            {
+                                title: "Sobre o Campus",
+                                rows: [{
+                                    title: "Sobre o IFC-CAS",
+                                    rowId: `${prefix}conhecer`,
+                                    description: "Quero conhecer o IFC-CAS"
+                                }]
+                            },
+                            {
+                                title: "Ensino Médio",
                                 rows: [{
                                     title: "Horário",
                                     rowId: `${prefix}horario`,
                                     description: "Horário do Ensino Médio atualizado."
-                                }]
-                            },
-                            {
-                                title: "Sobre o Campus",
-                                rows: [{
-                                    title: "Localização",
-                                    rowId: `${prefix}local`,
-                                    description: "Como chegar até o campus?"
                                 }]
                             },
                             {
@@ -95,10 +98,51 @@ const startSock = async () => {
                             sections
                         })
                         break
+                    case 'conhecer':
+                        var sections = [
+                            {
+                                title: "Sobre o Campus",
+                                rows: [{
+                                    title: "Sobre o IFC-CAS",
+                                    rowId: `${prefix}conhecer`,
+                                    description: "Quero conhecer o IFC-CAS"
+                                }]
+                            },
+                            {
+                                title: "Ensino Médio",
+                                rows: [{
+                                    title: "Horário",
+                                    rowId: `${prefix}horario`,
+                                    description: "Horário do Ensino Médio atualizado."
+                                }]
+                            },
+                            {
+                                title: "Desenvolvedores",
+                                rows: [{
+                                        title: "Criador",
+                                        rowId: `${prefix}criador`,
+                                        description: "Conheça o aluno desenvolvedor do assistente."
+                                    },
+                                    {
+                                        title: "Orientador",
+                                        rowId: `${prefix}orientador`,
+                                        description: "Conheça o orientador do projeto."
+                                    }
+                                ]
+                            },
+                        ]
+                        await sock.sendMessage(from, {
+                            text: dic.conhecer.geral,
+                            footer: "Escolha uma opção abaixo:",
+                            title: "[Assistente do IFC-CAS]",
+                            buttonText: "Ver opções",
+                            sections
+                        })
+                    break
                     case 'local':
                         await sock.sendMessage(
                             from, {
-                                text: "O Instituto Federal Catarinense - Campus Avançado Sombrio está localizado na Av. Pref. Francisco Lumertz Júnior, 931 - Januária, Sombrio - SC, 88960-000\n\nVocê também pode encontrá-lo clicando na localização abaixo:"
+                                text: dic.conhecer.local
                             }
                         )
                         await sock.sendMessage(
@@ -114,7 +158,7 @@ const startSock = async () => {
                         var templateButtons = [{
                                 index: 1,
                                 urlButton: {
-                                    displayText: '⭐ Siga no Instagram!',
+                                    displayText: 'Siga no Instagram! ⭐',
                                     url: 'https://instagram.com/gabriel.da.silva_'
                                 }
                             },
@@ -136,7 +180,7 @@ const startSock = async () => {
                         var templateButtons = [{
                                 index: 1,
                                 urlButton: {
-                                    displayText: '⭐ Linkedin',
+                                    displayText: 'Linkedin ⭐',
                                     url: 'https://br.linkedin.com/in/matheuslbraga'
                                 }
                             },
