@@ -32,13 +32,6 @@ const startSock = async () => {
     })
     store.bind(sock.ev)
     //
-    const reply = async (message) => {
-        await sock.sendMessage(from, {
-            text: message
-        }, {
-            quoted: msg
-        })
-    }
     //
     sock.ev.on('messages.upsert', async m => {
         try {
@@ -52,6 +45,13 @@ const startSock = async () => {
             const isOwner = sender.includes(ownerNumber) || false
             const isGroup = from.endsWith('@g.us')
             const { body, isMedia, isQuotedAudio, isQuotedImage, isQuotedSticker, isQuotedVideo, isMediaType } = MediaType
+            const reply = async (message) => {
+                await sock.sendMessage(from, {
+                    text: message
+                }, {
+                    quoted: msg
+                })
+            }
             if (body.startsWith(prefix)) {
                 const command = body.slice(1).trim().split(' ')[0].toLowerCase()
                 switch (command) { // commands
@@ -92,44 +92,36 @@ const startSock = async () => {
                         ]
                         await sock.sendMessage(from, {
                             text: "Olá! Sou um assistente virtual, como posso te ajudar?",
-                            footer: "https://sombrio.ifc.edu.br",
+                            footer: "Escolha uma opção abaixo:",
                             title: "[Assistente do IFC-CAS]",
-                            buttonText: "Saiba mais",
+                            buttonText: "Ver opções",
                             sections
                         })
                         break
                     case 'conhecer':
                         var sections = [
                             {
-                                title: "Sobre o Campus",
+                                title: "Localização",
                                 rows: [{
-                                    title: "Sobre o IFC-CAS",
-                                    rowId: `${prefix}conhecer`,
-                                    description: "Quero conhecer o IFC-CAS"
+                                    title: "Onde fica o campus?",
+                                    rowId: `${prefix}local`,
+                                    description: "Ver localização do IFC-CAS"
                                 }]
                             },
                             {
-                                title: "Ensino Médio",
+                                title: "Processo Seletivo",
                                 rows: [{
-                                    title: "Horário",
-                                    rowId: `${prefix}horario`,
-                                    description: "Horário do Ensino Médio atualizado."
-                                }]
-                            },
-                            {
-                                title: "Desenvolvedores",
-                                rows: [{
-                                        title: "Criador",
-                                        rowId: `${prefix}criador`,
-                                        description: "Conheça o aluno desenvolvedor do assistente."
+                                        title: "Ensino Médio + Curso Técnico",
+                                        rowId: `${prefix}integrado`,
+                                        description: "Quero conhecer os cursos técnicos integrados ao Ensino Médio."
                                     },
                                     {
-                                        title: "Orientador",
-                                        rowId: `${prefix}orientador`,
-                                        description: "Conheça o orientador do projeto."
+                                        title: "Ensino Superior",
+                                        rowId: `${prefix}superior`,
+                                        description: "Quero conhecer os cursos superiores."
                                     }
                                 ]
-                            },
+                            }
                         ]
                         await sock.sendMessage(from, {
                             text: dic.conhecer.geral,
@@ -138,6 +130,38 @@ const startSock = async () => {
                             buttonText: "Ver opções",
                             sections
                         })
+                    break
+                    case 'integrado':
+                        var templateButtons = [{
+                            index: 1,
+                            urlButton: {
+                                displayText: 'Portal de Ingresso 🟢',
+                                url: 'https://ingresso.ifc.edu.br/category/tecnico-integrado/'
+                            }
+                        },
+                        {
+                            index: 2,
+                            urlButton: {
+                                displayText: 'Provas Anteriores 🔴',
+                                url: 'https://ingresso.ifc.edu.br/category/tecnico-integrado/provas-anteriores/'
+                            }
+                        },
+                        {
+                            index: 3,
+                            quickReplyButton: {
+                                displayText: 'Voltar ao menu',
+                                id: `${prefix}oi`
+                            }
+                        },
+                    ]
+                    await sock.sendMessage(from, {
+                        text: dic.conhecer.processoseletivo.integrado,
+                        footer: "https://sombrio.ifc.edu.br",
+                        templateButtons: templateButtons
+                    })
+                    break
+                    case 'superior':
+                        reply("em breve mais informações aqui")
                     break
                     case 'local':
                         await sock.sendMessage(
