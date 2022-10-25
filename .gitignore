@@ -104,8 +104,10 @@ dist
 .tern-port
 
 # Private auth and message store
+baileys_auth_info/*
 auth_info_multi.json
 baileys_store_multi.json
 auth/*
 store/*
 temp/*
+session/*
